@@ -1,25 +1,35 @@
 import { render, screen } from '@testing-library/react'
 import Home from '../pages/index'
-import { useRouter } from 'next/router';
 
-// Mock the useRouter hook
-jest.mock('next/router', () => ({
-  useRouter: jest.fn(),
-}));
+const cheatsheets = [
+  {
+    type: 'react-hooks',
+    item: 'useDebounce',
+    title: 'useDebounce Hook',
+    description: 'A detailed look at the useDebounce hook in React.',
+  },
+  {
+    type: 'react-hooks',
+    item: 'useEffect',
+    title: 'useEffect Hook',
+    description: 'Understanding the useEffect hook in React.',
+  },
+];
 
-describe('Home', () => {
-  it('renders an image', () => {
-    const mockRouter = {
-      pathname: '/',
-      route: '/',
-      query: {},
-      asPath: '/',
-    };
-  
-    useRouter.mockImplementation(() => mockRouter);
-    
-    render(<Home />)
-    const image = screen.getAllByRole('img')[0]
-    expect(image).toBeInTheDocument()
-  })
-})
+describe('HomePage', () => {
+  it('renders the cheatsheet titles as buttons', () => {
+    render(<Home cheatsheets={cheatsheets} />);
+
+    // Check if the titles are rendered as buttons
+    cheatsheets.forEach((cheat) => {
+      const titleElement = screen.getByText(cheat.title);
+      expect(titleElement).toBeInTheDocument();
+    });
+
+    // Check if the descriptions are rendered
+    cheatsheets.forEach((cheat) => {
+      const descriptionElement = screen.getByText(cheat.description);
+      expect(descriptionElement).toBeInTheDocument();
+    });
+  });
+});
