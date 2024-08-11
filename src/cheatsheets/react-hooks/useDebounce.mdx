@@ -1,0 +1,31 @@
+---
+title: "useDebounce Hook"
+date: "2024-08-11"
+description: "A detailed look at the useDebounce hook in React."
+---
+
+# useDebounce Hook
+
+Here is an example of the `useDebounce` hook:
+
+```jsx
+import { useState } from 'react';
+
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+```
+
+<CopyToClipboard code={`import { useState } from 'react';\n\nfunction useDebounce(value, delay) {\n const [debouncedValue, setDebouncedValue] = useState(value);\n\n useEffect(() => {\n const handler = setTimeout(() => {\n setDebouncedValue(value);\n }, delay);\n\n return () => {\n clearTimeout(handler);\n };\n }, [value, delay]);\n\n return debouncedValue;\n}`} />
