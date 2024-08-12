@@ -93,7 +93,7 @@ jobs:
     - name: Deploy to VM
       env:
         HOST: ${{ secrets.HOST }}
-        DEPLOY_PATH: 
+        DEPLOY_PATH: /opt/helperz/app
       run: |
 
         echo "Starting SCP transfer..."
