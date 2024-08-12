@@ -15,3 +15,96 @@ jobs:
         node-version: '18'
     - run: npm ci
     - run: npm run test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - run: npm ci
+    - run: npm run build
+    - name: Build Docker Image
+      run: docker build -t helperz:latest .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+    
+    - name: Set SSH config
+      run: |
+        echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null" > ~/.ssh/config
+
+    - name: Create deploy script
+      run: |
+        cat << 'EOF' > deploy.sh
+          #!/bin/bash
+          set -e
+          set -x
+
+          # Define the log file path
+          LOG_DIR="/opt/helperz/logs"
+          LOG_FILE="\$LOG_DIR/deploy_\$(date +%Y%m%d_%H%M%S).log"
+
+          # Ensure the logs directory exists
+          mkdir -p "\$LOG_DIR"
+
+          log_message() {
+              echo "\$(date): \$1" | tee -a "\$LOG_FILE"
+          }
+
+          log_message "Navigating to the app directory"
+          cd /opt/helperz/app 2>&1 | tee -a "\$LOG_FILE"
+
+          log_message "Pulling the latest changes"
+          git pull origin main 2>&1 | tee -a "\$LOG_FILE"
+
+          log_message "Stopping and removing existing containers"
+          docker-compose down 2>&1 | tee -a "\$LOG_FILE"
+
+          log_message "Pruning unused Docker resources"
+          docker system prune -f 2>&1 | tee -a "\$LOG_FILE"
+
+          log_message "Building and starting Docker containers"
+          docker-compose up --build -d 2>&1 | tee -a "\$LOG_FILE"
+
+          log_message "Cleaning up old Docker images"
+          docker image prune -f 2>&1 | tee -a "\$LOG_FILE"
+
+          log_message "Reloading Nginx"
+          sudo systemctl reload nginx 2>&1 | tee -a "\$LOG_FILE"
+
+          log_message "Deployment completed"
+
+          # Display the last 100 lines of the log
+          tail -n 100 "\$LOG_FILE"
+        EOF
+
+    - name: Deploy to VM
+      env:
+        HOST: ${{ secrets.HOST }}
+        DEPLOY_PATH: /opt/helperz/app
+      run: |
+
+        echo "Starting SCP transfer..."
+        scp deploy.sh sp-deploy@$HOST:$DEPLOY_PATH || { echo "SCP failed"; exit 1; }
+        echo "SCP transfer completed."
+
+        # Execute the deployment script
+        ssh sp-deploy@$HOST << 'EOF'
+          echo "$DEPLOY_PATH"
+          echo $DEPLOY_PATH
+          cd /opt/helperz/app
+          chmod +x deploy.sh
+          ./deploy.sh
+        EOF
