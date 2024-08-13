@@ -8,7 +8,7 @@ export default function HomePage({ cheatsheets }) {
     <>
       <Head>
         <title>
-          Helperz | Home
+          Home | Helperz
         </title>
       </Head>
       <div className="container max-w-4xl min-h-[100vh] flex flex-col mx-auto">
