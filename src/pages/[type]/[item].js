@@ -17,7 +17,7 @@ export default function CheatsheetPage({ source, frontMatter }) {
   return (
     <>
       <Head>
-        <title>Helperz | {frontMatter.title}</title>
+        <title>{frontMatter.title} | Helperz</title>
         <meta name="description" content={frontMatter.description || 'Cheatsheet details'} />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
       </Head>
