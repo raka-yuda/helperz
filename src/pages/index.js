@@ -12,10 +12,29 @@ export default function HomePage({ cheatsheets }) {
         </title>
       </Head>
       <div className="container max-w-4xl min-h-[100vh] flex flex-col mx-auto">
-        <div className="flex flex-col mt-40 w-full">
-          <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-            <h1 className="text-4xl font-bold mb-6">Cheatsheets</h1>
+        <div className="flex flex-col md:mt-32 mt-24 w-full px-4 sm:px-6 lg:px-8 md:py-12">
+          <div className="
+            relative flex place-items-center 
+            before:absolute 
+            before:h-[300px] before:lg:h-[360px]
+            before:w-full sm:before:w-[480px] 
+            before:-translate-x-1/2 before:rounded-full 
+            before:bg-gradient-radial before:from-white 
+            before:to-transparent before:blur-2xl before:content-[''] 
+            after:absolute after:-z-20 
+            after:h-[180px] 
+            after:w-[240px] 
+            after:translate-x-1/3 after:bg-gradient-conic 
+            after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] 
+            before:dark:bg-gradient-to-br 
+            before:dark:from-transparent 
+            before:dark:to-blue-700/10 
+            after:dark:from-sky-900 
+            after:dark:via-[#0141ff]/40 
+          ">
           </div>
+            <h1 className="text-4xl font-bold mb-6">🗒️ Helperz</h1>
+            <p className="text-base font-normal mb-12">List of cheatsheets: </p>
           <div className="space-y-4 z-[21]">
             {cheatsheets.map((cheat) => (
               <Link
@@ -28,7 +47,6 @@ export default function HomePage({ cheatsheets }) {
               </Link>
             ))}
           </div>
-
         </div>
       </div>
     </>
