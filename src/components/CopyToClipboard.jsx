@@ -12,9 +12,14 @@ const CopyToClipboard = ({ code }) => {
   return (
     <button
       onClick={handleCopy}
-      className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      className="mb-6 inline-flex gap-2 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
     >
-      {copied ? 'Copied!' : 'Copy to Clipboard'}
+      <p className="m-0 py-1">
+        ✏️
+      </p>
+      <p className="m-0 py-1">
+        {copied ? 'Copied!' : 'Copy to Clipboard'}
+      </p>
     </button>
   );
 };
