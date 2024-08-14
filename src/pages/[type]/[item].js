@@ -22,10 +22,11 @@ export default function CheatsheetPage({ source, frontMatter }) {
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
       </Head>
       <div className="bg-gray-50 min-h-screen">
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <main className="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 					<button
 						onClick={handleBack}
-						className="mb-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+						className="mb-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500
+hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 					>
 						← Back
 					</button>
