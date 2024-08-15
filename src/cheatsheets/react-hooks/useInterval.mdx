@@ -1,0 +1,33 @@
+---
+title: "useInterval Hook"
+date: "2024-08-11"
+description: "A custom hook to set up intervals in React."
+---
+
+# useInterval Hook
+
+The `useInterval` hook allows you to use `setInterval` in a React-friendly way.
+
+```jsx
+import { useEffect, useRef } from 'react';
+
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      const id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+```
+
+<CopyToClipboard code={`import { useEffect, useRef } from 'react';\n\nfunction useInterval(callback, delay) {\n const savedCallback = useRef();\n\n useEffect(() => {\n savedCallback.current = callback;\n }, [callback]);\n\n useEffect(() => {\n function tick() {\n savedCallback.current();\n }\n if (delay !== null) {\n const id = setInterval(tick, delay);\n return () => clearInterval(id);\n }\n }, [delay]);\n}`} />
