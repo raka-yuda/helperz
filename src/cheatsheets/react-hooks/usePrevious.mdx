@@ -1,0 +1,25 @@
+---
+title: "usePrevious Hook"
+date: "2024-08-11"
+description: "A hook to get the previous value of a state or prop in React."
+---
+
+# usePrevious Hook
+
+The `usePrevious` hook allows you to keep track of the previous value of a state or prop.
+
+```jsx
+import { useRef, useEffect } from 'react';
+
+function usePrevious(value) {
+  const ref = useRef();
+
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref.current;
+}
+```
+
+<CopyToClipboard code={`import { useRef, useEffect } from 'react';\n\nfunction usePrevious(value) {\n const ref = useRef();\n\n useEffect(() => {\n ref.current = value;\n }, [value]);\n\n return ref.current;\n}`} />
