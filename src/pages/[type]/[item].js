@@ -46,9 +46,21 @@ hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring
 }
 
 export const getStaticPaths = async () => {
+  // Read cheatsheets data from the JSON file
+  const filePath = path.join(process.cwd(), 'src/data/cheatsheets.json');
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  const cheatsheets = JSON.parse(fileContent);
+
+  const paramsCheatsheets = cheatsheets.map((value) => ({
+    params: {
+      type: value.type,
+      item: value.item,
+    }
+  }));
+
   // Define paths for static generation
   const paths = [
-    { params: { type: 'react-hooks', item: 'useDebounce' } },
+    ...paramsCheatsheets
   ];
 
   return { paths, fallback: false };
