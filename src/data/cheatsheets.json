@@ -4,5 +4,29 @@
 		"item": "useDebounce",
 		"title": "useDebounce Hook",
 		"description": "A detailed look at the useDebounce hook in React."
+	},
+	{
+		"type": "react-hooks",
+		"item": "usePrevious",
+		"title": "usePrevious Hook",
+		"description": "A hook to get the previous value of a state or prop in React."
+	},
+	{
+		"type": "react-hooks",
+		"item": "useInterval",
+		"title": "useInterval Hook",
+		"description": "A custom hook to set up intervals in React."
+	},
+	{
+		"type": "react-hooks",
+		"item": "useToogle",
+		"title": "useToggle Hook",
+		"description": "A custom hook to toggle a boolean state."
+	},
+	{
+		"type": "react-hooks",
+		"item": "useOnClickOutside",
+		"title": "useOnClickOutside Hook",
+		"description": "A hook that detects clicks outside of a specified element."
 	}
 ]
