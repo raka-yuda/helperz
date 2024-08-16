@@ -1,0 +1,17 @@
+---
+title: "Deep Clone Function"
+date: "2024-08-11"
+description: "A utility function to deep clone an object."
+---
+
+# Deep Clone Function
+
+The `deepClone` function creates a deep copy of an object, ensuring that all nested objects are cloned as well.
+
+```js
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+```
+
+<CopyToClipboard code={`function deepClone(obj) {\n return JSON.parse(JSON.stringify(obj));\n}`} />
