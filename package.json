@@ -14,11 +14,13 @@
     "@mdx-js/loader": "^3.0.1",
     "@next/mdx": "^14.2.5",
     "@tailwindcss/typography": "^0.5.14",
+    "framer-motion": "^11.3.28",
     "gray-matter": "^4.0.3",
     "next": "14.2.5",
     "next-mdx-remote": "^5.0.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-icons": "^5.3.0",
     "react-syntax-highlighter": "^15.5.0"
   },
   "devDependencies": {
