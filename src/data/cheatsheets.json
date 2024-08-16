@@ -1,32 +1,50 @@
 [
 	{
 		"type": "react-hooks",
-		"item": "useDebounce",
-		"title": "useDebounce Hook",
-		"description": "A detailed look at the useDebounce hook in React."
+		"title": "React Hooks",
+		"cheatsheets": [
+			{
+				"item": "useDebounce",
+				"title": "useDebounce Hook",
+				"description": "A detailed look at the useDebounce hook in React.",
+				"path": "/cheatsheets/react-hooks/useDebounce"
+			},
+			{
+				"item": "usePrevious",
+				"title": "usePrevious Hook",
+				"description": "A hook to get the previous value of a state or prop in React.",
+				"path": "/cheatsheets/react-hooks/usePrevious"
+			},
+			{
+				"item": "useInterval",
+				"title": "useInterval Hook",
+				"description": "A custom hook to set up intervals in React.",
+				"path": "/cheatsheets/react-hooks/useInterval"
+			},
+			{
+				"item": "useToggle",
+				"title": "useToggle Hook",
+				"description": "A custom hook to toggle a boolean state.",
+				"path": "/cheatsheets/react-hooks/useToggle"
+			},
+			{
+				"item": "useOnClickOutside",
+				"title": "useOnClickOutside Hook",
+				"description": "A hook that detects clicks outside of a specified element.",
+				"path": "/cheatsheets/react-hooks/useOnClickOutside"
+			}
+		]
 	},
 	{
-		"type": "react-hooks",
-		"item": "usePrevious",
-		"title": "usePrevious Hook",
-		"description": "A hook to get the previous value of a state or prop in React."
-	},
-	{
-		"type": "react-hooks",
-		"item": "useInterval",
-		"title": "useInterval Hook",
-		"description": "A custom hook to set up intervals in React."
-	},
-	{
-		"type": "react-hooks",
-		"item": "useToogle",
-		"title": "useToggle Hook",
-		"description": "A custom hook to toggle a boolean state."
-	},
-	{
-		"type": "react-hooks",
-		"item": "useOnClickOutside",
-		"title": "useOnClickOutside Hook",
-		"description": "A hook that detects clicks outside of a specified element."
+		"type": "util-helpers",
+		"title": "Utility Helpers",
+		"cheatsheets": [
+			{
+				"item": "deepClone",
+				"title": "Deep Clone Function",
+				"description": "A utility function to deep clone an object.",
+				"path": "/cheatsheets/util-helpers/deepClone"
+			}
+		]
 	}
 ]
