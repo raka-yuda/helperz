@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 
 export default function CheatsheetPage({ source, frontMatter }) {
 	const router = useRouter();
+  const title = `${frontMatter.title} | Helperz`;
 
   const handleBack = () => {
     router.back();
@@ -17,9 +18,8 @@ export default function CheatsheetPage({ source, frontMatter }) {
   return (
     <>
       <Head>
-        <title>{frontMatter.title} | Helperz</title>
+        <title>{title}</title>
         <meta name="description" content={frontMatter.description || 'Cheatsheet details'} />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
       </Head>
       <div className="bg-gray-50 min-h-screen">
         <main className="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -46,22 +46,18 @@ hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring
 }
 
 export const getStaticPaths = async () => {
-  // Read cheatsheets data from the JSON file
   const filePath = path.join(process.cwd(), 'src/data/cheatsheets.json');
   const fileContent = fs.readFileSync(filePath, 'utf-8');
   const cheatsheets = JSON.parse(fileContent);
 
-  const paramsCheatsheets = cheatsheets.map((value) => ({
-    params: {
-      type: value.type,
-      item: value.item,
-    }
-  }));
-
-  // Define paths for static generation
-  const paths = [
-    ...paramsCheatsheets
-  ];
+  const paths = cheatsheets.flatMap((typeData) =>
+    typeData.cheatsheets.map((sheet) => ({
+      params: {
+        type: typeData.type,
+        item: sheet.item,
+      },
+    }))
+  );
 
   return { paths, fallback: false };
 };
@@ -82,7 +78,6 @@ export const getStaticProps = async ({ params }) => {
     },
     scope: data,
   });
-
 
   return { props: { source: mdxSource, frontMatter: data } };
 };
