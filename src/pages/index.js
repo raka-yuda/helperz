@@ -2,13 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
 import Head from 'next/head';
-import React, { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { FaFolder, FaFolderOpen, FaFile } from 'react-icons/fa';
 import { IoIosArrowForward } from "react-icons/io";
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CheatsheetItem = React.memo(({ sheet, typeData }) => (
-  <motion.li
+const CheatsheetItem = memo(function CheatsheetItem ({ sheet, typeData }) {
+  return <motion.li
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
     exit={{ opacity: 0, x: -20 }}
@@ -28,9 +28,9 @@ const CheatsheetItem = React.memo(({ sheet, typeData }) => (
       </motion.div>
     </Link>
   </motion.li>
-));
+});
 
-const TypeFolder = React.memo(({ typeData, isActive, onToggle }) => {
+const TypeFolder = memo(function TypeFolder ({ typeData, isActive, onToggle }) {
   return (
     <div className="border rounded-lg p-4">
       <motion.button
