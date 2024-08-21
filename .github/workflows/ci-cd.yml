@@ -48,46 +48,46 @@ jobs:
     - name: Create deploy script
       run: |
         cat << 'EOF' > deploy.sh
-          #!/bin/bash
-          set -e
-          set -x
+        #!/bin/bash
+        set -e
+        set -x
 
-          # Define the log file path
-          LOG_DIR="/opt/helperz/logs"
-          LOG_FILE="\$LOG_DIR/deploy_\$(date +%Y%m%d_%H%M%S).log"
+        # Define the log file path
+        LOG_DIR="/opt/helperz/logs"
+        LOG_FILE="$LOG_DIR/deploy_$(date +%Y%m%d_%H%M%S).log"
 
-          # Ensure the logs directory exists
-          mkdir -p "\$LOG_DIR"
+        # Ensure the logs directory exists
+        mkdir -p "$LOG_DIR"
 
-          log_message() {
-              echo "\$(date): \$1" | tee -a "\$LOG_FILE"
-          }
+        log_message() {
+            echo "$(date): $1" | tee -a "$LOG_FILE"
+        }
 
-          log_message "Navigating to the app directory"
-          cd /opt/helperz/app 2>&1 | tee -a "\$LOG_FILE"
+        log_message "Navigating to the app directory"
+        cd /opt/helperz/app 2>&1 | tee -a "$LOG_FILE"
 
-          log_message "Pulling the latest changes"
-          git pull origin main 2>&1 | tee -a "\$LOG_FILE"
+        log_message "Pulling the latest changes"
+        git pull origin main 2>&1 | tee -a "$LOG_FILE"
 
-          log_message "Stopping and removing existing containers"
-          docker-compose down 2>&1 | tee -a "\$LOG_FILE"
+        log_message "Stopping and removing existing containers"
+        docker-compose down 2>&1 | tee -a "$LOG_FILE"
 
-          log_message "Pruning unused Docker resources"
-          docker system prune -f 2>&1 | tee -a "\$LOG_FILE"
+        log_message "Pruning unused Docker resources"
+        docker system prune -f 2>&1 | tee -a "$LOG_FILE"
 
-          log_message "Building and starting Docker containers"
-          docker-compose up --build -d 2>&1 | tee -a "\$LOG_FILE"
+        log_message "Building and starting Docker containers"
+        docker-compose up --build -d 2>&1 | tee -a "$LOG_FILE"
 
-          log_message "Cleaning up old Docker images"
-          docker image prune -f 2>&1 | tee -a "\$LOG_FILE"
+        log_message "Cleaning up old Docker images"
+        docker image prune -f 2>&1 | tee -a "$LOG_FILE"
 
-          log_message "Reloading Nginx"
-          sudo systemctl reload nginx 2>&1 | tee -a "\$LOG_FILE"
+        log_message "Reloading Nginx"
+        sudo systemctl reload nginx 2>&1 | tee -a "$LOG_FILE"
 
-          log_message "Deployment completed"
+        log_message "Deployment completed"
 
-          # Display the last 100 lines of the log
-          tail -n 100 "\$LOG_FILE"
+        # Display the last 100 lines of the log
+        tail -n 100 "$LOG_FILE"
         EOF
 
     - name: Deploy to VM
