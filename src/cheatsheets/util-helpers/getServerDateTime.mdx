@@ -1,0 +1,43 @@
+---
+title: "Get Server Date Time Function"
+date: "2024-08-11"
+description: "A utility function to get server date time."
+---
+
+# Get Server Date Time Function
+
+The `getServerDateTime` function to get server date time.
+
+```js
+function getServerDateTime() {
+  var xmlHttp;
+  if (window.XMLHttpRequest) {
+    //FF, Opera, Safari, Chrome
+    xmlHttp = new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    //Old IE Browsers.
+    xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+  }
+  xmlHttp.open('HEAD', window.location.href, false);
+  xmlHttp.setRequestHeader('Content-Type', 'text/html');
+  xmlHttp.send('');
+  return xmlHttp.getResponseHeader('Date');
+}
+```
+
+<CopyToClipboard code={`
+  function getServerDateTime() {
+    var xmlHttp;
+    if (window.XMLHttpRequest) {
+      //FF, Opera, Safari, Chrome
+      xmlHttp = new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+      //Old IE Browsers.
+      xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    xmlHttp.open('HEAD', window.location.href, false);
+    xmlHttp.setRequestHeader('Content-Type', 'text/html');
+    xmlHttp.send('');
+    return xmlHttp.getResponseHeader('Date');
+  }
+`} />
