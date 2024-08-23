@@ -52,11 +52,10 @@ jobs:
         set -e
         set -x
 
-        # Define the log file path
-        LOG_DIR="/opt/helperz/logs"
+        PROJECT_NAME="helperz"
+        LOG_DIR="/opt/${PROJECT_NAME}/logs"
         LOG_FILE="$LOG_DIR/deploy_$(date +%Y%m%d_%H%M%S).log"
 
-        # Ensure the logs directory exists
         mkdir -p "$LOG_DIR"
 
         log_message() {
@@ -64,29 +63,29 @@ jobs:
         }
 
         log_message "Navigating to the app directory"
-        cd /opt/helperz/app 2>&1 | tee -a "$LOG_FILE"
+        cd /opt/${PROJECT_NAME}/app 2>&1 | tee -a "$LOG_FILE"
 
         log_message "Pulling the latest changes"
         git pull origin main 2>&1 | tee -a "$LOG_FILE"
 
-        log_message "Stopping and removing existing containers"
-        docker-compose down 2>&1 | tee -a "$LOG_FILE"
+        log_message "Stopping and removing existing containers for ${PROJECT_NAME}"
+        docker-compose -p ${PROJECT_NAME} down 2>&1 | tee -a "$LOG_FILE"
 
-        log_message "Pruning unused Docker resources"
-        docker system prune -f 2>&1 | tee -a "$LOG_FILE"
+        log_message "Pruning unused Docker resources for ${PROJECT_NAME}"
+        docker container prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME" 2>&1 | tee -a "$LOG_FILE"
+        docker network prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME" 2>&1 | tee -a "$LOG_FILE"
 
         log_message "Building and starting Docker containers"
-        docker-compose up --build -d 2>&1 | tee -a "$LOG_FILE"
+        docker-compose -p $PROJECT_NAME up --build -d 2>&1 | tee -a "$LOG_FILE"
 
-        log_message "Cleaning up old Docker images"
-        docker image prune -f 2>&1 | tee -a "$LOG_FILE"
+        log_message "Cleaning up old Docker images for ${PROJECT_NAME}"
+        docker image prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME" 2>&1 | tee -a "$LOG_FILE"
 
-        log_message "Reloading Nginx"
-        sudo systemctl reload nginx 2>&1 | tee -a "$LOG_FILE"
+        log_message "Reloading Nginx configuration for ${PROJECT_NAME}"
+        sudo nginx -t && sudo nginx -s reload 2>&1 | tee -a "$LOG_FILE"
 
         log_message "Deployment completed"
 
-        # Display the last 100 lines of the log
         tail -n 100 "$LOG_FILE"
         EOF
 
