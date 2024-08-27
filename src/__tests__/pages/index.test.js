@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import Home from '../pages/index'
+import Home from '@/pages/index'
 import '@testing-library/jest-dom'
 
 const cheatsheets = [
