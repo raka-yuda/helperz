@@ -20,4 +20,14 @@ function useToggle(initialValue = false) {
 }
 ```
 
-<CopyToClipboard code={`import { useState } from 'react';\n\nfunction useToggle(initialValue = false) {\n const [state, setState] = useState(initialValue);\n\n const toggle = () => setState(!state);\n\n return [state, toggle];\n}`} />
+<CopyToClipboard code={`
+import { useState } from 'react';
+
+function useToggle(initialValue = false) {
+  const [state, setState] = useState(initialValue);
+
+  const toggle = () => setState(!state);
+
+  return [state, toggle];
+}
+`} />
