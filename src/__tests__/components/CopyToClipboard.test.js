@@ -18,9 +18,9 @@ describe('CopyToClipboard', () => {
   
       fireEvent.click(button);
   
-      expect(button).toHaveTextContent('Copied!');
+      expect(button).toHaveTextContent('✏️Copied!');
   
-      await waitFor(() => expect(button).toHaveTextContent('Copy to Clipboard'), { timeout: 2000 });
+      await waitFor(() => expect(button).toHaveTextContent('✏️Copy to Clipboard'), { timeout: 2000 });
   
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(mockCode);
     });
