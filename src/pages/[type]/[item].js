@@ -1,4 +1,3 @@
-// pages/[type]/[item].js
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -6,9 +5,19 @@ import { serialize } from 'next-mdx-remote/serialize';
 import Head from 'next/head';
 import MDXProvider from '@/components/MDXProvider';
 import { useRouter } from 'next/router';
+import TableOfContents from '@/components/TableOfContents';
+import { MDXRemote } from 'next-mdx-remote';
 
-export default function CheatsheetPage({ source, frontMatter }) {
-	const router = useRouter();
+
+const addIdsToHeadings = (content) => {
+  return content.replace(/^(#{1,6})\s+(.+)$/gm, (match, hashes, title) => {
+    const id = title.toLowerCase().replace(/[^\w]+/g, '-');
+    return `${hashes} <h${hashes.length} id="${id}">${title}</h${hashes.length}>`;
+  });
+};
+
+export default function CheatsheetPage({ source, frontMatter, headings }) {
+  const router = useRouter();
   const title = `${frontMatter.title} | Helperz`;
 
   const handleBack = () => {
@@ -22,24 +31,30 @@ export default function CheatsheetPage({ source, frontMatter }) {
         <meta name="description" content={frontMatter.description || 'Cheatsheet details'} />
       </Head>
       <div className="bg-gray-50 min-h-screen">
-        <main className="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-					<button
-						onClick={handleBack}
-						className="mb-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500
-hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-					>
-						← Back
-					</button>
-          <article className="bg-white shadow-lg rounded-lg overflow-hidden">
-            <header className="px-6 py-8 border-b border-gray-200">
-              <h1 className="text-3xl font-bold text-gray-900">{frontMatter.title}</h1>
-              <p className="mt-2 text-sm text-gray-600">{frontMatter.date}</p>
-            </header>
-            <div className="prose prose-lg max-w-none px-6 py-8">
-            	<MDXProvider source={source} />
-            </div>
-          </article>
-        </main>
+        <div className="container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <button
+            onClick={handleBack}
+            className="mb-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            ← Back
+          </button>
+          <div className="flex flex-col lg:flex-row gap-8">
+            <aside className="lg:w-1/4 lg:sticky lg:top-8 lg:self-start">
+              <TableOfContents headings={headings} />
+            </aside>
+            <main className="lg:w-3/4">
+              <article className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <header className="px-6 py-8 border-b border-gray-200">
+                  <h1 className="text-3xl font-bold text-gray-900">{frontMatter.title}</h1>
+                  <p className="mt-2 text-sm text-gray-600">{frontMatter.date}</p>
+                </header>
+                <div className="prose prose-lg max-w-none px-6 py-8">
+                  <MDXProvider source={source} />
+                </div>
+              </article>
+            </main>
+          </div>
+        </div>
       </div>
     </>
   );
@@ -70,6 +85,16 @@ export const getStaticProps = async ({ params }) => {
   // Parse the frontmatter
   const { content, data } = matter(source);
 
+  // Extract headings
+  const headings = content.split('\n')
+    .filter(line => line.startsWith('#'))
+    .map(line => {
+      const level = line.match(/^#+/)[0].length;
+      const text = line.replace(/^#+\s+/, '');
+      const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+      return { level, text, id };
+    });
+
   // Serialize the MDX content
   const mdxSource = await serialize(content, {
     mdxOptions: {
@@ -79,5 +104,5 @@ export const getStaticProps = async ({ params }) => {
     scope: data,
   });
 
-  return { props: { source: mdxSource, frontMatter: data } };
+  return { props: { source: mdxSource, frontMatter: data, headings } };
 };
