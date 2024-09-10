@@ -32,22 +32,26 @@ export default function CheatsheetPage({ source, frontMatter, headings }) {
       </Head>
       <div className="bg-gray-50 min-h-screen">
         <div className="container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <button
-            onClick={handleBack}
-            className="mb-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            ← Back
-          </button>
+          <header className="flex py-8 gap-8">
+            <div className="lg:w-1/4">
+              <button
+                onClick={handleBack}
+                className="mb-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                ← Back
+              </button>
+            </div>
+            <div className="lg:w-3/4 flex flex-col">
+              <h1 className="text-3xl font-bold text-gray-900">{frontMatter.title}</h1>
+              <p className="mt-2 text-sm text-gray-600">{frontMatter.date}</p>
+            </div>
+          </header>
           <div className="flex flex-col lg:flex-row gap-8">
-            <aside className="lg:w-1/4 lg:sticky lg:top-8 lg:self-start">
+            <aside className="flex flex-col lg:w-1/4 lg:sticky lg:top-8 lg:self-start">
               <TableOfContents headings={headings} />
             </aside>
             <main className="lg:w-3/4">
               <article className="bg-white shadow-lg rounded-lg overflow-hidden">
-                <header className="px-6 py-8 border-b border-gray-200">
-                  <h1 className="text-3xl font-bold text-gray-900">{frontMatter.title}</h1>
-                  <p className="mt-2 text-sm text-gray-600">{frontMatter.date}</p>
-                </header>
                 <div className="prose prose-lg max-w-none px-6 py-8">
                   <MDXProvider source={source} />
                 </div>
