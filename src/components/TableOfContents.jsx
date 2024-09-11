@@ -38,12 +38,12 @@ const TableOfContents = ({ headings }) => {
     <nav className="toc">
       <ul className="space-y-2">
         {headings.map((heading) => (
-          <li key={heading.id} className={`toc-item ${heading.level === 2 ? 'ml-0' : 'ml-4'}`}>
+          <li key={heading.id} className={`toc-item`}>
             <a
               href={`#${heading.id}`}
-              className={`block py-1 px-2 text-sm hover:bg-gray-100 rounded ${
-                activeId === heading.id ? 'font-bold text-blue-600' : 'text-gray-700'
-              }`}
+              className={`block py-1 px-2 text-sm hover:bg-gray-100 rounded
+                ${activeId === heading.id ? 'font-bold text-blue-600' : 'text-gray-700'}
+              `}
               onClick={(e) => handleClick(e, heading.id)}
             >
               {heading.text}
