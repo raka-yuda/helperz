@@ -17,16 +17,35 @@ const addIdsToHeadings = (content) => {
   });
 };
 
-const generateRandomNumbers = (min, max) => {
-  const randomNumber1 = Math.floor(Math.random() * (max - min + 1)) + min;
-  let randomNumber2;
+const generateRandomNumbers = (min, max, exclude = []) => {
+  const validNumbers = [];
 
-  do {
-    randomNumber2 = Math.floor(Math.random() * (max - min + 1)) + min;
-  } while (randomNumber2 === randomNumber1); 
+  for (let i = min; i <= max; i++) {
+    if (!exclude.includes(i)) {
+      validNumbers.push(i);
+    }
+  }
+
+  if (validNumbers.length < 2) {
+    throw new Error("Not enough valid numbers to generate two distinct values.");
+  }
+
+  // Helper function to shuffle an array (Fisher-Yates shuffle)
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  const shuffledNumbers = shuffle(validNumbers);
+  const randomNumber1 = shuffledNumbers[0];
+  const randomNumber2 = shuffledNumbers[1];
 
   return [randomNumber1, randomNumber2];
-};
+}
+
 
 
 export default function CheatsheetPage({ source, frontMatter, headings, contentRecommendation }) {
@@ -146,8 +165,10 @@ export const getStaticProps = async ({ params }) => {
     }))
   );
 
+  const currentContent = paths.findIndex(isCurrentContent);
+
   // Temporary randomize generate for next content recommend
-  const [num1, num2] = generateRandomNumbers(0, (paths.length - 1));
+  const [num1, num2] = generateRandomNumbers(0, (paths.length - 1), [currentContent]);
 
   let contentRecommendation = {
     pre: {
