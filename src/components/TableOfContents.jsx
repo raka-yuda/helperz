@@ -42,9 +42,10 @@ const TableOfContents = ({ headings }) => {
             <a
               href={`#${heading.id}`}
               className={`block py-1 px-2 text-sm hover:bg-gray-100 rounded
-                ${activeId === heading.id ? 'font-bold text-blue-600' : 'text-gray-700'}
+                ${activeId === heading.id ? 'active font-bold text-blue-600' : 'text-gray-700'}
               `}
               onClick={(e) => handleClick(e, heading.id)}
+              data-testid={`toc-link-${heading.id}`} 
             >
               {heading.text}
             </a>
