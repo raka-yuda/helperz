@@ -1,52 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { serialize } from 'next-mdx-remote/serialize';
+
 import Head from 'next/head';
-import MDXProvider from '@/components/MDXProvider';
 import { useRouter } from 'next/router';
+import { serialize } from 'next-mdx-remote/serialize';
+
+import MDXProvider from '@/components/MDXProvider';
 import TableOfContents from '@/components/TableOfContents';
-import { MDXRemote } from 'next-mdx-remote';
-import Link from 'next/link';
-
-
-const addIdsToHeadings = (content) => {
-  return content.replace(/^(#{1,6})\s+(.+)$/gm, (match, hashes, title) => {
-    const id = title.toLowerCase().replace(/[^\w]+/g, '-');
-    return `${hashes} <h${hashes.length} id="${id}">${title}</h${hashes.length}>`;
-  });
-};
-
-const generateRandomNumbers = (min, max, exclude = []) => {
-  const validNumbers = [];
-
-  for (let i = min; i <= max; i++) {
-    if (!exclude.includes(i)) {
-      validNumbers.push(i);
-    }
-  }
-
-  if (validNumbers.length < 2) {
-    throw new Error("Not enough valid numbers to generate two distinct values.");
-  }
-
-  // Helper function to shuffle an array (Fisher-Yates shuffle)
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-
-  const shuffledNumbers = shuffle(validNumbers);
-  const randomNumber1 = shuffledNumbers[0];
-  const randomNumber2 = shuffledNumbers[1];
-
-  return [randomNumber1, randomNumber2];
-}
-
-
+import FooterContentRecommendation from '@/components/FooterContentRecommendation';
+import { generateRandomNumbers } from '@/utils';
 
 export default function CheatsheetPage({ source, frontMatter, headings, contentRecommendation }) {
   const router = useRouter();
@@ -91,37 +54,7 @@ export default function CheatsheetPage({ source, frontMatter, headings, contentR
             </main>
           </div>
         </div>
-        {contentRecommendation && (
-          <footer className='container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border-t-[1px] border-gray-200 grid grid-flow-row grid-cols-2 gap-2'>
-            {contentRecommendation && contentRecommendation?.pre && (
-              <Link
-                href={`/${contentRecommendation.pre.params.type}/${contentRecommendation.pre.params.item}`}
-                className='rounded-md border-[1px] p-4 w-full cursor-pointer shadow hover:shadow-none'
-              >
-                <div className='flex flex-row gap-2'>
-                  <h3 className="font-bold text-gray-900">← </h3>
-                  <div className='flex flex-col w-full break-words max-w-24 md:max-w-full'>
-                    <h3 className="font-bold text-gray-900">{contentRecommendation.pre.params.title}</h3>
-                    <p className='text-sm text-gray-400'>{contentRecommendation.pre.params.description}</p>
-                  </div>
-                </div>
-              </Link>
-            )}
-            {contentRecommendation && contentRecommendation?.next && (
-              <Link href={`/${contentRecommendation.next.params.type}/${contentRecommendation.next.params.item}`}
-                className='rounded-md border-[1px] p-4 w-full cursor-pointer shadow hover:shadow-none'
-              >
-                <div className='flex flex-row gap-2'>
-                  <div className='flex flex-col w-full break-words max-w-24 md:max-w-full'>
-                    <h3 className="font-bold text-gray-900">{contentRecommendation.next.params.title}</h3>
-                    <p className='text-sm text-gray-400'>{contentRecommendation.next.params.description}</p>
-                  </div>
-                  <h3 className="font-bold text-gray-900">→</h3>
-                </div>
-              </Link>
-            )}
-          </footer>
-        )}
+        {contentRecommendation && <FooterContentRecommendation contentRecommendation={contentRecommendation}/>}
       </div>
     </>
   );
