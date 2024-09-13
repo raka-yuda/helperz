@@ -62,23 +62,23 @@ export default function CheatsheetPage({ source, frontMatter, headings, contentR
         <title>{title}</title>
         <meta name="description" content={frontMatter.description || 'Cheatsheet details'} />
       </Head>
-      <div className="bg-gray-50 min-h-screen">
-        <div className="container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="flex flex-col bg-gray-50 min-h-screen">
+        <div className="flex-grow container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <header className="flex py-8 gap-8">
             <div className="lg:w-1/4">
               <button
                 onClick={handleBack}
-                className="mb-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="mb-6 inline-flex items-center px-4 py-2 border border-transparent md:text-sm text-xs font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 ←  Back
               </button>
             </div>
             <div className="lg:w-3/4 flex flex-col">
-              <h1 className="text-3xl font-bold text-gray-900">{frontMatter.title}</h1>
+              <h1 className="md:text-3xl text-xl font-bold text-gray-900">{frontMatter.title}</h1>
               <p className="mt-2 text-sm text-gray-600">{frontMatter.date}</p>
             </div>
           </header>
-          <div className="flex flex-col lg:flex-row gap-8 pb-16">
+          <div className="flex flex-col lg:flex-row gap-8 ">
             <aside className="flex flex-col lg:w-1/4 lg:sticky lg:top-8 lg:self-start">
               <TableOfContents headings={headings} />
             </aside>
@@ -90,40 +90,38 @@ export default function CheatsheetPage({ source, frontMatter, headings, contentR
               </article>
             </main>
           </div>
-          {
-            contentRecommendation && (
-              <footer className='border-t-[1px] border-gray-200 flex flex-row gap-2 pt-4'>
-                {contentRecommendation && contentRecommendation?.pre && (
-                  <Link
-                    href={`/${contentRecommendation.pre.params.type}/${contentRecommendation.pre.params.item}`}
-                    className='rounded-md border-[1px] p-4 w-full cursor-pointer shadow hover:shadow-none'
-                  >
-                    <div className='flex flex-row gap-2'>
-                      <h3 className="font-bold text-gray-900 gap-2">← </h3>
-                      <div className='flex flex-col w-full'>
-                        <h3 className="font-bold text-gray-900">{contentRecommendation.pre.params.title}</h3>
-                        <p className='text-sm text-gray-400'>{contentRecommendation.pre.params.description}</p>
-                      </div>
-                    </div>
-                  </Link>
-                )}
-                {contentRecommendation && contentRecommendation?.next && (
-                  <Link href={`/${contentRecommendation.next.params.type}/${contentRecommendation.next.params.item}`}
-                    className='rounded-md border-[1px] p-4 w-full cursor-pointer shadow hover:shadow-none'
-                  >
-                    <div className='flex flex-row gap-2'>
-                      <div className='flex flex-col w-full'>
-                        <h3 className="font-bold text-gray-900">{contentRecommendation.next.params.title}</h3>
-                        <p className='text-sm text-gray-400'>{contentRecommendation.next.params.description}</p>
-                      </div>
-                      <h3 className="font-bold text-gray-900 gap-2">→</h3>
-                    </div>
-                  </Link>
-                )}
-              </footer>
-            )
-          }
         </div>
+        {contentRecommendation && (
+          <footer className='container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border-t-[1px] border-gray-200 grid grid-flow-row grid-cols-2 gap-2'>
+            {contentRecommendation && contentRecommendation?.pre && (
+              <Link
+                href={`/${contentRecommendation.pre.params.type}/${contentRecommendation.pre.params.item}`}
+                className='rounded-md border-[1px] p-4 w-full cursor-pointer shadow hover:shadow-none'
+              >
+                <div className='flex flex-row gap-2'>
+                  <h3 className="font-bold text-gray-900">← </h3>
+                  <div className='flex flex-col w-full break-words max-w-24 md:max-w-full'>
+                    <h3 className="font-bold text-gray-900">{contentRecommendation.pre.params.title}</h3>
+                    <p className='text-sm text-gray-400'>{contentRecommendation.pre.params.description}</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+            {contentRecommendation && contentRecommendation?.next && (
+              <Link href={`/${contentRecommendation.next.params.type}/${contentRecommendation.next.params.item}`}
+                className='rounded-md border-[1px] p-4 w-full cursor-pointer shadow hover:shadow-none'
+              >
+                <div className='flex flex-row gap-2'>
+                  <div className='flex flex-col w-full break-words max-w-24 md:max-w-full'>
+                    <h3 className="font-bold text-gray-900">{contentRecommendation.next.params.title}</h3>
+                    <p className='text-sm text-gray-400'>{contentRecommendation.next.params.description}</p>
+                  </div>
+                  <h3 className="font-bold text-gray-900">→</h3>
+                </div>
+              </Link>
+            )}
+          </footer>
+        )}
       </div>
     </>
   );
