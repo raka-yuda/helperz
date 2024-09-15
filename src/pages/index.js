@@ -2,9 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
 import Head from 'next/head';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { FaFolder, FaFolderOpen, FaFile } from 'react-icons/fa';
-import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowForward, IoIosSearch } from "react-icons/io";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CheatsheetItem = memo(function CheatsheetItem ({ sheet, typeData }) {
@@ -71,14 +71,33 @@ const TypeFolder = memo(function TypeFolder ({ typeData, isActive, onToggle }) {
 
 
 export default function HomePage({ cheatsheets }) {
+  // const [activeTypes, setActiveTypes] = useState({});
+
+  // const handleTypeClick = useCallback((type) => {
+  //   setActiveTypes(prev => ({
+  //     ...prev,
+  //     [type]: !prev[type]
+  //   }));
+  // }, []);
+
   const [activeTypes, setActiveTypes] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleTypeClick = useCallback((type) => {
-    setActiveTypes(prev => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
+    setActiveTypes((prev) => ({ ...prev, [type]: !prev[type] }));
   }, []);
+
+  const filteredCheatsheets = useMemo(() => {
+    if (!searchTerm) return cheatsheets;
+
+    return cheatsheets.map(typeData => ({
+      ...typeData,
+      cheatsheets: typeData.cheatsheets.filter(sheet =>
+        sheet.item.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    })).filter(typeData => typeData.cheatsheets.length > 0);
+  }, [cheatsheets, searchTerm]);
+
 
 
   return (
@@ -111,9 +130,21 @@ export default function HomePage({ cheatsheets }) {
           ">
           </div>
           <h1 className="text-4xl font-bold mb-6">🗒️ Helperz</h1>
+          <div className="mb-6">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search cheatsheets..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-2 pl-10 pr-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              />
+              <IoIosSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black" />
+            </div>
+          </div>
           <p className="text-base font-normal mb-4">List of cheatsheets: </p>
           <div className="space-y-4 z-[21] mb-12">
-            {cheatsheets.map((typeData) => (
+            {filteredCheatsheets.map((typeData) => (
               <TypeFolder
                 key={typeData.type}
                 typeData={typeData}
