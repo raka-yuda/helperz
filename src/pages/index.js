@@ -144,14 +144,18 @@ export default function HomePage({ cheatsheets }) {
           </div>
           <p className="text-base font-normal mb-4">List of cheatsheets: </p>
           <div className="space-y-4 z-[21] mb-12">
-            {filteredCheatsheets.map((typeData) => (
-              <TypeFolder
-                key={typeData.type}
-                typeData={typeData}
-                isActive={activeTypes[typeData.type]}
-                onToggle={() => handleTypeClick(typeData.type)}
-              />
-            ))}
+            {(filteredCheatsheets && filteredCheatsheets.length > 0)
+              ? filteredCheatsheets.map((typeData) => (
+                <TypeFolder
+                  key={typeData.type}
+                  typeData={typeData}
+                  isActive={activeTypes[typeData.type]}
+                  onToggle={() => handleTypeClick(typeData.type)}
+                />))
+              : <div className="border rounded-lg p-4 flex justify-center items-center dark:text-white text-black">
+                Empty Data
+              </div>
+            }
           </div>
         </div>
       </div>
