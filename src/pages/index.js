@@ -1,34 +1,16 @@
 import fs from 'fs';
 import path from 'path';
-import Link from 'next/link';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
+
 import { memo, useCallback, useMemo, useState } from 'react';
-import { FaFolder, FaFolderOpen, FaFile } from 'react-icons/fa';
+import { FaFolder, FaFolderOpen } from 'react-icons/fa';
 import { IoIosArrowForward, IoIosSearch } from "react-icons/io";
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CheatsheetItem = memo(function CheatsheetItem ({ sheet, typeData }) {
-  return <motion.li
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -20 }}
-    transition={{ duration: 0 }}
-    className="duration-200"
-  >
-    <Link
-      href={`/${typeData.type}/${sheet.item}`}
-      className="flex items-center p-2 hover:bg-gray-100 rounded transition hover:text-blue-600"
-    >
-      <motion.div className="flex items-center w-full">
-        <FaFile className="mr-2 text-gray-500" />
-        <div>
-          <h2 className="text-lg font-semibold">{sheet.title}</h2>
-          <p className="text-sm text-gray-600">{sheet.description}</p>
-        </div>
-      </motion.div>
-    </Link>
-  </motion.li>
-});
+import { useDebounce } from '@/hooks';
+
+const CheatsheetItem = dynamic(() => import('@/components/CheatsheetItem'), { ssr: false });
 
 const TypeFolder = memo(function TypeFolder ({ typeData, isActive, onToggle }) {
   return (
@@ -83,22 +65,27 @@ export default function HomePage({ cheatsheets }) {
   const [activeTypes, setActiveTypes] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 300); // 300ms delay, adjust as needed
+
+  const handleSearchChange = useCallback((e) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+
   const handleTypeClick = useCallback((type) => {
     setActiveTypes((prev) => ({ ...prev, [type]: !prev[type] }));
   }, []);
 
   const filteredCheatsheets = useMemo(() => {
-    if (!searchTerm) return cheatsheets;
+    if (!debouncedSearchTerm) return cheatsheets;
 
     return cheatsheets.map(typeData => ({
       ...typeData,
       cheatsheets: typeData.cheatsheets.filter(sheet =>
-        sheet.item.toLowerCase().includes(searchTerm.toLowerCase())
+        sheet.item.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       )
     })).filter(typeData => typeData.cheatsheets.length > 0);
-  }, [cheatsheets, searchTerm]);
-
-
+  }, [cheatsheets, debouncedSearchTerm]);
 
   return (
     <>
@@ -136,7 +123,7 @@ export default function HomePage({ cheatsheets }) {
                 type="text"
                 placeholder="Search cheatsheets..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full p-2 pl-10 pr-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               />
               <IoIosSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black" />
