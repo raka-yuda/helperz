@@ -50,6 +50,12 @@
 				"title": "Get Server Date Time Function",
 				"description": "A utility function to get server date time.",
 				"path": "/cheatsheets/util-helpers/getServerDateTime"
+			},
+			{
+				"item": "EachUtils",
+				"title": "EachUtils Component in React",
+				"description": "A guide to understanding and using the EachUtils component in React for rendering lists dynamically.",
+				"path": "/cheatsheets/util-helpers/EachUtils"
 			}
 		]
 	}

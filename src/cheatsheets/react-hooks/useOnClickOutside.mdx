@@ -1,12 +1,16 @@
 ---
 title: "useOnClickOutside Hook"
 date: "2024-08-11"
-description: "A hook that detects clicks outside of a specified element."
+description: "A custom React hook that detects clicks outside of a specified element and triggers a callback function."
 ---
 
-## useOnClickOutside Hook Implementation
+## Introduction
 
-The `useOnClickOutside` hook triggers a callback when a click occurs outside of a specified element.
+The `useOnClickOutside` hook is a custom React hook that allows you to detect clicks outside of a specified element. This can be particularly useful for implementing features like closing dropdown menus, modal windows, or any other UI elements that should be dismissed when the user clicks outside of them.
+
+## Hook Implementation
+
+Here's the implementation of the `useOnClickOutside` hook:
 
 ```javascript
 import { useEffect } from 'react';
@@ -43,3 +47,77 @@ function useOnClickOutside(ref, handler) {
   }, [ref, handler]);
 }
 `} />
+
+## How It Works
+
+1. The hook takes two parameters:
+   - `ref`: A React ref object pointing to the element you want to monitor.
+   - `handler`: A callback function to be executed when a click outside occurs.
+
+2. It uses the `useEffect` hook to set up an event listener for the 'mousedown' event on the document.
+
+3. The `handleClickOutside` function checks if the click event target is outside the referenced element.
+
+4. If the click is outside, it calls the provided handler function.
+
+5. The effect cleanup function removes the event listener to prevent memory leaks.
+
+## Usage Example
+
+Here's an example of how to use the `useOnClickOutside` hook in a React component:
+
+```jsx
+import React, { useRef, useState } from 'react';
+import useOnClickOutside from './useOnClickOutside';
+
+function Dropdown() {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useOnClickOutside(dropdownRef, () => setIsOpen(false));
+
+  return (
+    <div ref={dropdownRef}>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle Dropdown</button>
+      {isOpen && (
+        <ul>
+          <li>Option 1</li>
+          <li>Option 2</li>
+          <li>Option 3</li>
+        </ul>
+      )}
+    </div>
+  );
+}
+```
+
+<CopyToClipboard code={`
+import React, { useRef, useState } from 'react';
+import useOnClickOutside from './useOnClickOutside';
+
+function Dropdown() {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useOnClickOutside(dropdownRef, () => setIsOpen(false));
+
+  return (
+    <div ref={dropdownRef}>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle Dropdown</button>
+      {isOpen && (
+        <ul>
+          <li>Option 1</li>
+          <li>Option 2</li>
+          <li>Option 3</li>
+        </ul>
+      )}
+    </div>
+  );
+}
+`} />
+
+## Best Practices
+
+1. Always provide a stable reference to the handler function to avoid unnecessary re-renders.
+2. Use this hook in combination with other UI state management techniques for more complex scenarios.
+3. Consider adding support for touch events (`touchstart`)
