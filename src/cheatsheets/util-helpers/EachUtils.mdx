@@ -1,0 +1,67 @@
+---
+title: "EachUtils Component in React"
+date: "2024-10-14"
+description: "A guide to understanding and using the EachUtils component in React for rendering lists dynamically."
+---
+
+## Introduction
+
+The `EachUtils` component is a utility in React that simplifies rendering a list of items using a provided render function. It is a flexible and reusable way to handle array data, especially when you need to iterate through a list and define custom render logic for each item.
+
+## Implementation
+
+Here’s the implementation of the `EachUtils` component:
+
+```javascript
+import { Children } from "react";
+
+export const EachUtils = ({ render, of }) => {
+  return <>{Children.toArray(of.map((item, index) => render(item, index)))}</>;
+};
+```
+
+### Explanation:
+
+1. **Importing `Children`**: 
+   The `Children` utility from React provides methods to handle child elements passed to a component. Here, we use `Children.toArray` to convert a list of child elements into a valid array.
+
+2. **Props**: 
+   The component accepts two props:
+   - `render`: A function that determines how each item in the array should be displayed.
+   - `of`: The array of items that will be passed to the `render` function.
+
+3. **Mapping Over the Array**: 
+   The `of.map()` function is used to iterate over the array, applying the `render` function to each `item` in the array. The `render(item, index)` provides both the item and its index as arguments.
+
+4. **Using `Children.toArray`**: 
+   This ensures that the output is a valid list of React child elements, which helps with key management and rendering a dynamic list properly.
+
+5. **Returning the Result**: 
+   The component wraps the rendered elements in a React fragment (`<>...</>`), ensuring no additional DOM nodes are introduced.
+
+## Usage Example
+
+Let’s say you have a list of names, and you want to render each name inside a `<p>` element. Here’s how you can use the `EachUtils` component:
+
+```jsx
+const names = ['Alice', 'Bob', 'Charlie'];
+
+const renderName = (name, index) => <p key={index}>{name}</p>;
+
+<EachUtils of={names} render={renderName} />;
+```
+
+In this example:
+- The `of` prop is the array of names: `['Alice', 'Bob', 'Charlie']`.
+- The `renderName` function specifies how each name should be rendered, in this case, inside a `<p>` tag.
+- The `EachUtils` component maps over the array and renders each name as a paragraph, ensuring React handles the list properly.
+
+## Benefits of EachUtils
+
+1. **Reusability**: You can reuse this component to iterate over any array, as long as you provide a valid render function.
+2. **Flexibility**: The `render` function allows custom logic for how each item is displayed.
+3. **Safety**: By using `Children.toArray`, React ensures that the children are properly processed and handled, making this a reliable method for rendering dynamic content.
+
+## Conclusion
+
+The `EachUtils` component is a simple but powerful utility for rendering arrays in React. By using a custom render function, you gain flexibility in how items are displayed. The use of `Children.toArray` ensures the proper handling of dynamic lists, making `EachUtils` a useful tool for managing array-based data in your React applications.
