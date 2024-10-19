@@ -53,19 +53,10 @@ const TypeFolder = memo(function TypeFolder ({ typeData, isActive, onToggle }) {
 
 
 export default function HomePage({ cheatsheets }) {
-  // const [activeTypes, setActiveTypes] = useState({});
-
-  // const handleTypeClick = useCallback((type) => {
-  //   setActiveTypes(prev => ({
-  //     ...prev,
-  //     [type]: !prev[type]
-  //   }));
-  // }, []);
-
   const [activeTypes, setActiveTypes] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
 
-  const debouncedSearchTerm = useDebounce(searchTerm, 300); // 300ms delay, adjust as needed
+  const debouncedSearchTerm = useDebounce(searchTerm, 100);
 
   const handleSearchChange = useCallback((e) => {
     setSearchTerm(e.target.value);
