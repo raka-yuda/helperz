@@ -73,7 +73,9 @@ export default function HomePage({ cheatsheets }) {
     return cheatsheets.map(typeData => ({
       ...typeData,
       cheatsheets: typeData.cheatsheets.filter(sheet =>
-        sheet.item.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        sheet?.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        sheet?.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
+        typeData?.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       )
     })).filter(typeData => typeData.cheatsheets.length > 0);
   }, [cheatsheets, debouncedSearchTerm]);
