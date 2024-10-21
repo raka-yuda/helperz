@@ -4,13 +4,15 @@ import FooterContentRecommendation from '@/components/FooterContentRecommendatio
 
 // Mocking Next.js Link component
 jest.mock('next/link', () => {
-  return ({ href, children, ...props }) => {
+  const Link = ({ href, children, ...props }) => {
     return (
       <a href={href} {...props}>
         {children}
       </a>
     );
   };
+  Link.displayName = 'Link';
+  return Link;
 });
 
 // Sample props
