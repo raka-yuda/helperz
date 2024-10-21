@@ -17,11 +17,11 @@ const components = {
       // Remove backticks from inline code
       const codeContent = typeof children === 'string' ? children.replace(/`/g, '') : children;
       return (
-        <code
+        <span
           className="px-1 py-0.5 rounded bg-gray-200 text-gray-800 text-sm font-mono"
         >
           {codeContent}
-        </code>
+        </span>
       );
     }
 
