@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { FaFile } from 'react-icons/fa';
 import Link from 'next/link';
+import HighlightText from '@/components/HighlightText';
 
-const CheatsheetItem = ({ sheet, typeData }) => {
+const CheatsheetItem = ({ sheet, typeData, searchTerm }) => {
 	return <motion.li
 		initial={{ opacity: 0, x: -20 }}
 		animate={{ opacity: 1, x: 0 }}
@@ -17,8 +18,12 @@ const CheatsheetItem = ({ sheet, typeData }) => {
 			<motion.div className="flex items-center w-full">
 				<FaFile className="mr-2 text-gray-500" />
 				<div>
-					<h2 className="text-lg font-semibold">{sheet.title}</h2>
-					<p className="text-sm text-gray-600">{sheet.description}</p>
+					<h2 className="text-lg font-semibold">
+            <HighlightText text={sheet.title} searchTerm={searchTerm} />
+          </h2>
+					<p className="text-sm text-gray-600">
+            <HighlightText text={sheet.description} searchTerm={searchTerm} />
+          </p>
 				</div>
 			</motion.div>
 		</Link>
