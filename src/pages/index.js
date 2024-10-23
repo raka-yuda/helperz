@@ -4,7 +4,7 @@ import Head from 'next/head';
 import dynamic from 'next/dynamic';
 
 import { memo, useCallback, useMemo, useState } from 'react';
-import { FaFolder, FaFolderOpen } from 'react-icons/fa';
+import { FaFile, FaFolder, FaFolderOpen } from 'react-icons/fa';
 import { IoIosArrowForward, IoIosSearch } from "react-icons/io";
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -12,7 +12,9 @@ import { useDebounce } from '@/hooks';
 
 const CheatsheetItem = dynamic(() => import('@/components/CheatsheetItem'), { ssr: false });
 
-const TypeFolder = memo(function TypeFolder ({ typeData, isActive, onToggle }) {
+const HighlightText = dynamic(() => import('@/components/HighlightText'), { ssr: false });
+
+const TypeFolder = ({ typeData, isActive, onToggle, searchTerm }) => {
   return (
     <div className="border rounded-lg p-4">
       <motion.button
@@ -29,7 +31,7 @@ const TypeFolder = memo(function TypeFolder ({ typeData, isActive, onToggle }) {
           <IoIosArrowForward />
         </motion.span>
         {isActive ? <FaFolderOpen size={22} /> : <FaFolder size={20} />}
-        {typeData.title}
+        <HighlightText text={typeData.title} searchTerm={searchTerm} />
       </motion.button>
       <AnimatePresence>
         {isActive && (
@@ -41,14 +43,19 @@ const TypeFolder = memo(function TypeFolder ({ typeData, isActive, onToggle }) {
             className="ml-6 space-y-2 overflow-hidden mt-2 duration-300"
           >
             {typeData.cheatsheets.map((sheet) => (
-              <CheatsheetItem key={sheet.item} sheet={sheet} typeData={typeData} />
+              <CheatsheetItem 
+                key={sheet.item} 
+                sheet={sheet} 
+                typeData={typeData}
+                searchTerm={searchTerm}
+              />
             ))}
           </motion.ul>
         )}
       </AnimatePresence>
     </div>
   );
-});
+};
 
 
 
@@ -131,6 +138,7 @@ export default function HomePage({ cheatsheets }) {
                   typeData={typeData}
                   isActive={activeTypes[typeData.type]}
                   onToggle={() => handleTypeClick(typeData.type)}
+                  searchTerm={debouncedSearchTerm}
                 />))
               : <div className="border rounded-lg p-4 flex justify-center items-center dark:text-white text-black">
                 Empty Data
