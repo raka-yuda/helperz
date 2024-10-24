@@ -37,35 +37,33 @@ describe('HomePage', () => {
     expect(title).toBeInTheDocument();
   });
 
-  // it('renders the cheatsheet titles as buttons and toggles content', async () => {
-  //   render(<Home cheatsheets={cheatsheets} />);
+  it('renders the cheatsheet titles as buttons and toggles content', async () => {
+    render(<Home cheatsheets={cheatsheets} />);
 
-  //   expect(titleButton).toBeInTheDocument();
+    for (const cheat of cheatsheets) {
+      const titleButton = screen.getByRole('button', { name: cheat.title });
+      expect(titleButton).toBeInTheDocument();
 
-  //   for (const cheat of cheatsheets) {
-  //     const titleButton = screen.getByRole('button', { name: cheat.title });
-  //     expect(titleButton).toBeInTheDocument();
+      for (const sheet of cheat.cheatsheets) {
+        expect(screen.queryByText(sheet.title)).not.toBeInTheDocument();
+        expect(screen.queryByText(sheet.description)).not.toBeInTheDocument();
+      }
 
-  //     for (const sheet of cheat.cheatsheets) {
-  //       expect(screen.queryByText(sheet.title)).not.toBeInTheDocument();
-  //       expect(screen.queryByText(sheet.description)).not.toBeInTheDocument();
-  //     }
+      fireEvent.click(titleButton);
 
-  //     fireEvent.click(titleButton);
+      for (const sheet of cheat.cheatsheets) {
+        expect(await screen.findByText(sheet.title)).toBeInTheDocument();
+        expect(screen.getByText(sheet.description)).toBeInTheDocument();
+      }
 
-  //     for (const sheet of cheat.cheatsheets) {
-  //       expect(await screen.findByText(sheet.title)).toBeInTheDocument();
-  //       expect(screen.getByText(sheet.description)).toBeInTheDocument();
-  //     }
+      fireEvent.click(titleButton);
 
-  //     fireEvent.click(titleButton);
-
-  //     await waitFor(() => {
-  //       for (const sheet of cheat.cheatsheets) {
-  //         expect(screen.queryByText(sheet.title)).not.toBeInTheDocument();
-  //         expect(screen.queryByText(sheet.description)).not.toBeInTheDocument();
-  //       }
-  //     }, { timeout: 1000 });
-  //   }
-  // });
+      await waitFor(() => {
+        for (const sheet of cheat.cheatsheets) {
+          expect(screen.queryByText(sheet.title)).not.toBeInTheDocument();
+          expect(screen.queryByText(sheet.description)).not.toBeInTheDocument();
+        }
+      }, { timeout: 1000 });
+    }
+  });
 });
