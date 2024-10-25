@@ -1,109 +1,168 @@
 name: CI/CD
 
 on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
   push:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      rollback_version:
+        description: 'Version to rollback to (e.g., v1.2.3)'
+        required: false
+        type: string
+
+env:
+  NODE_VERSION: '18'
+  DOCKER_IMAGE: helperz
+  DEPLOY_PATH: /opt/helperz/app
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
     - run: npm ci
     - run: npm run test
 
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-    - run: npm ci
-    - run: npm run build
-    - name: Build Docker Image
-      run: docker build -t helperz:latest .
-
   deploy:
-    needs: build
+    needs: [test]
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-    - name: Set up SSH key
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Deploy Variables
+      id: deploy-vars
       run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ ! -z "${{ github.event.inputs.rollback_version }}" ]; then
+          echo "version=${{ github.event.inputs.rollback_version }}" >> $GITHUB_OUTPUT
+          echo "is_rollback=true" >> $GITHUB_OUTPUT
+        else
+          # Get latest version tag and increment
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || echo "v0.0.0")
+          MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
+          MINOR=$(echo $LATEST_TAG | cut -d. -f2)
+          PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+          NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH+1))"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "is_rollback=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Build and Tag Docker Image
+      if: steps.deploy-vars.outputs.is_rollback == 'false'
+      run: |
+        docker build -t ${{ env.DOCKER_IMAGE }}:${{ steps.deploy-vars.outputs.version }} .
+        docker tag ${{ env.DOCKER_IMAGE }}:${{ steps.deploy-vars.outputs.version }} ${{ env.DOCKER_IMAGE }}:latest
+
+    - name: Create Git Tag
+      if: steps.deploy-vars.outputs.is_rollback == 'false'
+      run: |
+        git tag ${{ steps.deploy-vars.outputs.version }}
+        git push origin ${{ steps.deploy-vars.outputs.version }}
+
+    - name: Create deployment script
+      run: |
+        cat > deploy.sh << 'SCRIPT'
+        #!/bin/bash
+        set -euo pipefail
+
+        VERSION="$1"
+        IS_ROLLBACK="$2"
+        PROJECT_NAME="helperz"
+        DEPLOY_PATH="/opt/$PROJECT_NAME/app"
+        LOG_FILE="/opt/$PROJECT_NAME/deploy.log"
+
+        # Log with timestamp
+        log() {
+          echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+        }
+
+        # Backup current deployment
+        backup_current() {
+          if [ -f docker-compose.yml ]; then
+            cp docker-compose.yml "docker-compose.yml.backup"
+            log "Backup created"
+          fi
+        }
+
+        # Restore from backup if deployment fails
+        restore_backup() {
+          if [ -f "docker-compose.yml.backup" ]; then
+            log "Restoring from backup..."
+            mv "docker-compose.yml.backup" docker-compose.yml
+            docker-compose up -d
+          fi
+        }
+
+        # Deploy specific version
+        deploy_version() {
+          local version="$1"
+          log "Deploying version: $version"
+          
+          # Stop current deployment
+          docker-compose down || log "No existing deployment to stop"
+          
+          # Update deployment
+          docker pull $PROJECT_NAME:$version || {
+            log "Failed to pull image $PROJECT_NAME:$version"
+            return 1
+          }
+          
+          # Start new version
+          VERSION=$version docker-compose up -d || {
+            log "Failed to start containers"
+            return 1
+          }
+          
+          # Health check
+          sleep 5
+          if ! docker-compose ps | grep -q "Up"; then
+            log "Health check failed"
+            return 1
+          fi
+          
+          echo "$version" > current_version.txt
+          log "Successfully deployed version: $version"
+        }
+
+        cd "$DEPLOY_PATH"
+        backup_current
+
+        if ! deploy_version "$VERSION"; then
+          log "Deployment failed"
+          if [ "$IS_ROLLBACK" != "true" ]; then
+            log "Attempting to restore previous version"
+            restore_backup
+          fi
+          exit 1
+        fi
+        SCRIPT
+
+    - name: Deploy to server
+      env:
+        HOST: ${{ secrets.HOST }}
+        VERSION: ${{ steps.deploy-vars.outputs.version }}
+        IS_ROLLBACK: ${{ steps.deploy-vars.outputs.is_rollback }}
+      run: |
+        # Setup SSH
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-    
-    - name: Set SSH config
-      run: |
-        echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null" > ~/.ssh/config
 
-    - name: Create deploy script
-      run: |
-        cat << 'EOF' > deploy.sh
-        #!/bin/bash
-        set -e
-        set -x
-
-        PROJECT_NAME="helperz"
-        LOG_DIR="/opt/${PROJECT_NAME}/logs"
-        LOG_FILE="$LOG_DIR/deploy_$(date +%Y%m%d_%H%M%S).log"
-
-        mkdir -p "$LOG_DIR"
-
-        log_message() {
-            echo "$(date): $1" | tee -a "$LOG_FILE"
-        }
-
-        log_message "Navigating to the app directory"
-        cd /opt/${PROJECT_NAME}/app 2>&1 | tee -a "$LOG_FILE"
-
-        log_message "Pulling the latest changes"
-        git pull origin main 2>&1 | tee -a "$LOG_FILE"
-
-        log_message "Stopping and removing existing containers for ${PROJECT_NAME}"
-        docker-compose -p ${PROJECT_NAME} down 2>&1 | tee -a "$LOG_FILE"
-
-        log_message "Pruning unused Docker resources for ${PROJECT_NAME}"
-        docker container prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME" 2>&1 | tee -a "$LOG_FILE"
-        docker network prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME" 2>&1 | tee -a "$LOG_FILE"
-
-        log_message "Building and starting Docker containers"
-        docker-compose -p $PROJECT_NAME up --build -d 2>&1 | tee -a "$LOG_FILE"
-
-        log_message "Cleaning up old Docker images for ${PROJECT_NAME}"
-        docker image prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME" 2>&1 | tee -a "$LOG_FILE"
-
-        log_message "Reloading Nginx configuration for ${PROJECT_NAME}"
-        sudo nginx -t && sudo nginx -s reload 2>&1 | tee -a "$LOG_FILE"
-
-        log_message "Deployment completed"
-
-        tail -n 100 "$LOG_FILE"
-        EOF
-
-    - name: Deploy to VM
-      env:
-        HOST: ${{ secrets.HOST }}
-        DEPLOY_PATH: /opt/helperz/app
-      run: |
-
-        echo "Starting SCP transfer..."
-        scp deploy.sh sp-deploy@$HOST:$DEPLOY_PATH || { echo "SCP failed"; exit 1; }
-        echo "SCP transfer completed."
-
-        # Execute the deployment script
-        ssh sp-deploy@$HOST << 'EOF'
-          echo "$DEPLOY_PATH"
-          echo $DEPLOY_PATH
-          cd /opt/helperz/app
-          chmod +x deploy.sh
-          ./deploy.sh
-        EOF
+        # Transfer and execute deployment script
+        scp deploy.sh sp-deploy@$HOST:${{ env.DEPLOY_PATH }}/
+        ssh sp-deploy@$HOST "chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh && \
+          ${{ env.DEPLOY_PATH }}/deploy.sh $VERSION $IS_ROLLBACK"
