@@ -17,6 +17,7 @@ env:
   NODE_VERSION: '18'
   DOCKER_IMAGE: helperz
   DEPLOY_PATH: /opt/helperz/app
+  PROJECT_NAME: helperz
 
 jobs:
   test:
@@ -32,8 +33,22 @@ jobs:
     - run: npm ci
     - run: npm run test
 
+  build:
+    needs: test
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
+
   deploy:
-    needs: [test]
+    needs: [test, build]
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       github.event_name == 'workflow_dispatch'
@@ -50,7 +65,6 @@ jobs:
           echo "version=${{ github.event.inputs.rollback_version }}" >> $GITHUB_OUTPUT
           echo "is_rollback=true" >> $GITHUB_OUTPUT
         else
-          # Get latest version tag and increment
           LATEST_TAG=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || echo "v0.0.0")
           MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
           MINOR=$(echo $LATEST_TAG | cut -d. -f2)
@@ -80,74 +94,75 @@ jobs:
 
         VERSION="$1"
         IS_ROLLBACK="$2"
-        PROJECT_NAME="helperz"
-        DEPLOY_PATH="/opt/$PROJECT_NAME/app"
-        LOG_FILE="/opt/$PROJECT_NAME/deploy.log"
+        PROJECT_NAME="${{ env.PROJECT_NAME }}"
+        DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
+        LOG_DIR="/opt/${PROJECT_NAME}/logs"
+        LOG_FILE="$LOG_DIR/deploy_$(date +%Y%m%d_%H%M%S).log"
 
-        # Log with timestamp
-        log() {
-          echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+        mkdir -p "$LOG_DIR"
+
+        log_message() {
+          echo "$(date): $1" | tee -a "$LOG_FILE"
         }
 
-        # Backup current deployment
         backup_current() {
           if [ -f docker-compose.yml ]; then
             cp docker-compose.yml "docker-compose.yml.backup"
-            log "Backup created"
+            log_message "Backup created"
           fi
         }
 
-        # Restore from backup if deployment fails
         restore_backup() {
           if [ -f "docker-compose.yml.backup" ]; then
-            log "Restoring from backup..."
+            log_message "Restoring from backup..."
             mv "docker-compose.yml.backup" docker-compose.yml
             docker-compose up -d
           fi
         }
 
-        # Deploy specific version
         deploy_version() {
           local version="$1"
-          log "Deploying version: $version"
+          log_message "Deploying version: $version"
+
+          log_message "Pulling the latest changes"
+          git pull origin main || log_message "Pulling the latest changes failed"
+
+          log_message "Stopping and removing existing containers for ${PROJECT_NAME}"
+          docker-compose -p ${PROJECT_NAME} down || log_message "No existing deployment to stop"
           
-          # Stop current deployment
-          docker-compose down || log "No existing deployment to stop"
-          
-          # Update deployment
-          docker pull $PROJECT_NAME:$version || {
-            log "Failed to pull image $PROJECT_NAME:$version"
+          log_message "Pruning unused Docker resources for ${PROJECT_NAME}"
+          docker container prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME" 
+          docker network prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME"
+
+          log_message "Building and starting Docker containers"
+          VERSION=$version docker-compose -p $PROJECT_NAME up --build -d || {
+            log_message "Failed to start containers"
             return 1
           }
           
-          # Start new version
-          VERSION=$version docker-compose up -d || {
-            log "Failed to start containers"
-            return 1
-          }
-          
-          # Health check
-          sleep 5
-          if ! docker-compose ps | grep -q "Up"; then
-            log "Health check failed"
-            return 1
-          fi
-          
+          log_message "Cleaning up old Docker images for ${PROJECT_NAME}"
+          docker image prune -f --filter "label=com.docker.compose.project=$PROJECT_NAME"
+
+          log_message "Reloading Nginx configuration for ${PROJECT_NAME}"
+          sudo nginx -t && sudo nginx -s reload
+
           echo "$version" > current_version.txt
-          log "Successfully deployed version: $version"
+          log_message "Successfully deployed version: $version"
         }
 
         cd "$DEPLOY_PATH"
         backup_current
 
         if ! deploy_version "$VERSION"; then
-          log "Deployment failed"
+          log_message "Deployment failed"
           if [ "$IS_ROLLBACK" != "true" ]; then
-            log "Attempting to restore previous version"
+            log_message "Attempting to restore previous version"
             restore_backup
           fi
           exit 1
         fi
+
+        tail -n 100 "$LOG_FILE"
         SCRIPT
 
     - name: Deploy to server
@@ -156,13 +171,12 @@ jobs:
         VERSION: ${{ steps.deploy-vars.outputs.version }}
         IS_ROLLBACK: ${{ steps.deploy-vars.outputs.is_rollback }}
       run: |
-        # Setup SSH
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+        echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null" > ~/.ssh/config
 
-        # Transfer and execute deployment script
         scp deploy.sh sp-deploy@$HOST:${{ env.DEPLOY_PATH }}/
         ssh sp-deploy@$HOST "chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh && \
           ${{ env.DEPLOY_PATH }}/deploy.sh $VERSION $IS_ROLLBACK"
