@@ -4,7 +4,8 @@ import withMDX from '@next/mdx';
 
 const nextConfig = {
   reactStrictMode: true,
-  pageExtensions: ['js', 'jsx', 'md', 'mdx']
+  pageExtensions: ['js', 'jsx', 'md', 'mdx'],
+  output: 'standalone',
 };
 
 export default withMDX({
