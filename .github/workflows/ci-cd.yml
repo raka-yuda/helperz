@@ -61,11 +61,19 @@ jobs:
     - name: Setup Deploy Variables
       id: deploy-vars
       run: |
+        # Fetch all tags from the remote
+        git fetch --tags
+
+        # Get the latest tag, sorted by version
+        LATEST_TAG=$(git tag | grep "^v" | sort -V | tail -n 1)
+        
+        # If no tag found, default to v0.0.0
+        LATEST_TAG=${LATEST_TAG:-v0.0.0}
+
         if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ ! -z "${{ github.event.inputs.rollback_version }}" ]; then
           echo "version=${{ github.event.inputs.rollback_version }}" >> $GITHUB_OUTPUT
           echo "is_rollback=true" >> $GITHUB_OUTPUT
         else
-          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || echo "v0.0.0")
           MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
           MINOR=$(echo $LATEST_TAG | cut -d. -f2)
           PATCH=$(echo $LATEST_TAG | cut -d. -f3)
