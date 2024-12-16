@@ -170,12 +170,20 @@ jobs:
         HOST: ${{ secrets.HOST }}
         VERSION: ${{ steps.deploy-vars.outputs.version }}
         IS_ROLLBACK: ${{ steps.deploy-vars.outputs.is_rollback }}
+        NODE_ENV: production
+        NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
+        NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${{ secrets.UMAMI_SCRIPT_URL }}
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
         echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null" > ~/.ssh/config
+        
+        echo "NODE_ENV=$NODE_ENV" >> .env.production
+        echo "NEXT_PUBLIC_UMAMI_WEBSITE_ID=$NEXT_PUBLIC_UMAMI_WEBSITE_ID" >> .env.production
+        echo "NEXT_PUBLIC_UMAMI_SCRIPT_URL=$NEXT_PUBLIC_UMAMI_SCRIPT_URL" >> .env.production
+        scp .env.production sp-deploy@$HOST:$DEPLOY_PATH || { echo "SCP failed"; exit 1; }
 
         scp deploy.sh sp-deploy@$HOST:${{ env.DEPLOY_PATH }}/
         ssh sp-deploy@$HOST "chmod +x ${{ env.DEPLOY_PATH }}/deploy.sh && \
