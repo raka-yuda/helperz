@@ -5,7 +5,7 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Analytics />
-      <Component {...pageProps} />;
+      <Component {...pageProps} />
     </>
   );
 }
