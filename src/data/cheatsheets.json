@@ -6,32 +6,27 @@
 			{
 				"item": "useDebounce",
 				"title": "useDebounce Hook",
-				"description": "A detailed look at the useDebounce hook in React.",
-				"path": "/cheatsheets/react-hooks/useDebounce"
+				"description": "A detailed look at the useDebounce hook in React."
 			},
 			{
 				"item": "usePrevious",
 				"title": "usePrevious Hook",
-				"description": "A hook to get the previous value of a state or prop in React.",
-				"path": "/cheatsheets/react-hooks/usePrevious"
+				"description": "A hook to get the previous value of a state or prop in React."
 			},
 			{
 				"item": "useInterval",
 				"title": "useInterval Hook",
-				"description": "A custom hook to set up intervals in React.",
-				"path": "/cheatsheets/react-hooks/useInterval"
+				"description": "A custom hook to set up intervals in React."
 			},
 			{
 				"item": "useToggle",
 				"title": "useToggle Hook",
-				"description": "A custom hook to toggle a boolean state.",
-				"path": "/cheatsheets/react-hooks/useToggle"
+				"description": "A custom hook to toggle a boolean state."
 			},
 			{
 				"item": "useOnClickOutside",
 				"title": "useOnClickOutside Hook",
-				"description": "A hook that detects clicks outside of a specified element.",
-				"path": "/cheatsheets/react-hooks/useOnClickOutside"
+				"description": "A hook that detects clicks outside of a specified element."
 			}
 		]
 	},
@@ -42,20 +37,17 @@
 			{
 				"item": "deepClone",
 				"title": "Deep Clone Function",
-				"description": "A utility function to deep clone an object.",
-				"path": "/cheatsheets/util-helpers/deepClone"
+				"description": "A utility function to deep clone an object."
 			},
 			{
 				"item": "getServerDateTime",
 				"title": "Get Server Date Time Function",
-				"description": "A utility function to get server date time.",
-				"path": "/cheatsheets/util-helpers/getServerDateTime"
+				"description": "A utility function to get server date time."
 			},
 			{
 				"item": "EachUtils",
 				"title": "EachUtils Component in React",
-				"description": "A guide to understanding and using the EachUtils component in React for rendering lists dynamically.",
-				"path": "/cheatsheets/util-helpers/EachUtils"
+				"description": "A guide to understanding and using the EachUtils component in React for rendering lists dynamically."
 			}
 		]
 	}
