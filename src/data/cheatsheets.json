@@ -27,6 +27,11 @@
 				"item": "useOnClickOutside",
 				"title": "useOnClickOutside Hook",
 				"description": "A hook that detects clicks outside of a specified element."
+			},
+			{
+				"item": "usePersistedStorage",
+				"title": "usePersistedStorage Hook",
+				"description": "The `usePersistedStorage` hook provides a proper way for handle persistant data from localStorage."
 			}
 		]
 	},
