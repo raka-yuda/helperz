@@ -1,0 +1,49 @@
+---
+title: "usePersistedStorage Hook"
+date: "2025-03-13"
+description: "A custom hook to get persist storage from localStorage."
+---
+
+## useToggle Hook Implementation
+
+The `usePersistedStorage` hook provides a proper way for handle persistant data from localStorage.
+
+```typescript
+import { useEffect, useState } from 'react';
+
+function usePersistedStorage<T>(key: string, initialValue: any) {
+  const [value, setValue] = useState(() => {
+    const item = localStorage.getItem(key);
+
+    if (!item) return initialValue;
+
+    return JSON.parse(item) as T;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value])
+
+  return [value, setValue] as const;
+}
+```
+
+<CopyToClipboard code={`
+import { useEffect, useState } from 'react';
+
+function usePersistedStorage<T>(key: string, initialValue: any) {
+  const [value, setValue] = useState(() => {
+    const item = localStorage.getItem(key);
+
+    if (!item) return initialValue;
+
+    return JSON.parse(item) as T;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value])
+
+  return [value, setValue] as const;
+}
+`} />
